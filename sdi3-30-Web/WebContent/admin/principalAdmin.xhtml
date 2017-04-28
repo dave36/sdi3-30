@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="/templates/template-admin.xhtml">
+	<ui:define name="header">
+	    
+	</ui:define>
+	<ui:define name="cuerpo">
+		<h:form id="form-admin">
+			<p:panel>
+				<p:dataTable border="1" var="var"
+					value="#{controller.user}">
+					<p:column headerText="#{msgs.idPrincipal}" 
+								style="text-align:center">
+						<h:outputText value="#{var.id}"/>			
+					</p:column>
+					
+					<p:column headerText="#{msgs.isAdmPrincipal}" 
+								style="text-align:center">
+						<h:outputText value="#{var.isAdmin}"/>			
+					</p:column>
+					
+					<p:column headerText="#{msgs.statusPrincipal}" 
+								style="text-align:center">
+						<h:outputText value="#{var.status}"/>			
+					</p:column>
+					
+					<p:column headerText="#{msgs.nombrePrincipal}" 
+								style="text-align:center">
+						<h:outputText value="#{var.login}"/>			
+					</p:column>
+					
+					<p:column headerText="#{msgs.emailPrincipal}" 
+								style="text-align:center">
+						<h:outputText value="#{var.email}"/>			
+					</p:column>
+				</p:dataTable>
+			</p:panel>		    
+		</h:form>
+	</ui:define>
+	<ui:define name="pie">
+	    
+	</ui:define>
+</ui:composition>
+</html>
