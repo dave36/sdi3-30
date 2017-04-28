@@ -5,7 +5,7 @@
             <dependent-object/>
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="sdi3-30-Web.war" deploy-path="/" handle="module:/resource/sdi3-30-Web/sdi3-30-Web">
+        <dependent-module archiveName="sdi3-30.Web.war" deploy-path="/" handle="module:/resource/sdi3-30.Web/sdi3-30.Web">
             <dependent-object/>
             <dependency-type>uses</dependency-type>
         </dependent-module>

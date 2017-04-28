@@ -16,11 +16,13 @@ public class RemoteServicesLocator implements ServiceFactory {
 		try {
 			context = new InitialContext();
 			/*
-			return (AdminService)context.lookup("sdi3-30-EAR/sdi3-"
-					+ "30-EJB/EjbAdminServiceImpl!com.sdi.business"
-					+ ".impl.admin.AdminServiceRemote");
-					*/
-			return (AdminService)context.lookup("sdi3-30-EAR/sdi3-30-EJB/EjbAdminServiceImpl!com.sdi.business.impl.admin.AdminServiceRemote");
+			 * return (AdminService)context.lookup("sdi3-30-EAR/sdi3-" +
+			 * "30-EJB/EjbAdminServiceImpl!com.sdi.business" +
+			 * ".impl.admin.AdminServiceRemote");
+			 */
+			return (AdminService) context
+					.lookup("sdi3-30-EAR/sdi3-30-EJB/EjbAdminServiceImpl!"
+							+ "com.sdi.business.impl.admin.AdminServiceRemote");
 		} catch (NamingException e) {
 			throw new RuntimeException("JNDI problem", e);
 		}
@@ -32,7 +34,7 @@ public class RemoteServicesLocator implements ServiceFactory {
 		InitialContext context;
 		try {
 			context = new InitialContext();
-			return (UserService)context.lookup("sdi3-30-EAR/sdi3-30"
+			return (UserService) context.lookup("sdi3-30-EAR/sdi3-30"
 					+ "-EJB/EjbUserServiceImpl!com.sdi."
 					+ "business.impl.user.UserServiceRemote");
 		} catch (NamingException e) {
@@ -46,7 +48,7 @@ public class RemoteServicesLocator implements ServiceFactory {
 		InitialContext context;
 		try {
 			context = new InitialContext();
-			return (TaskService)context.lookup("sdi3-30-EAR/sdi3-30"
+			return (TaskService) context.lookup("sdi3-30-EAR/sdi3-30"
 					+ "-EJB/EjbTaskServiceImpl!com.sdi."
 					+ "business.impl.task.TaskServiceRemote");
 		} catch (NamingException e) {
