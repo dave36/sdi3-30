@@ -2,6 +2,7 @@ package com.sdi.business.impl.task;
 
 import java.util.List;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.jws.WebService;
 
@@ -13,6 +14,7 @@ import com.sdi.business.impl.task.command.DuplicateCategoryCommand;
 import com.sdi.business.impl.task.command.MarkTaskAsFinishedCommand;
 import com.sdi.business.impl.task.command.UpdateCategoryCommand;
 import com.sdi.business.impl.task.command.UpdateTaskCommand;
+import com.sdi.business.integration.Auditor;
 import com.sdi.dto.Category;
 import com.sdi.dto.Task;
 import com.sdi.persistence.Persistence;

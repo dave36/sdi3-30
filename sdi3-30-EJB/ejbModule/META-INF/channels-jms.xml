@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<messaging-deployment xmlns="urn:jboss:messaging-deployment:1.0">
+    <hornetq-server>
+       <jms-destinations>
+          <jms-queue name="envio">
+            <entry name="jms/queue/envio"/>
+            <entry name="java:jboss/exported/jms/queue/envio"/>
+          </jms-queue>
+          <jms-queue name="recepcion">
+            <entry name="jms/queue/recepcion"/>
+            <entry name="java:jboss/exported/jms/queue/recepcion"/>
+          </jms-queue>
+          <jms-queue name="log">
+            <entry name="jms/queue/log"/>
+            <entry name="java:jboss/exported/jms/queue/log"/>
+          </jms-queue>
+       </jms-destinations>
+     </hornetq-server>
+</messaging-deployment> 
