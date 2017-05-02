@@ -15,7 +15,7 @@ import alb.util.log.Log;
 import alb.util.menu.Action;
 
 public class AñadirTareaAction implements Action {
-	
+
 	private static final String JMS_CONNECTION_FACTORY = "jms/RemoteConnectionFactory";
 	private static final String NOTANEITOR_QUEUE = "jms/queue/envio";
 
@@ -25,22 +25,26 @@ public class AñadirTareaAction implements Action {
 
 	@Override
 	public void execute() throws Exception {
+		String usuario = Console.readString("Usuario");
+		String contraseña = Console.readString("Constraseña");
 		String title = Console.readString("Titulo");
 		String comentarios = Console.readString("Comentarios");
 		initialize();
-		MapMessage msg = createMessage(title, comentarios);
+		MapMessage msg = createMessage(usuario, contraseña, title, comentarios);
 		sender.send(msg);
 		close();
 		Console.println("Tarea añadida");
 	}
-	
-	private MapMessage createMessage(String title, String comentarios) {
+
+	private MapMessage createMessage(String usuario, String contraseña,
+			String title, String comentarios) {
 		MapMessage map = null;
 		try {
 			map = session.createMapMessage();
+			map.setString("usuario", usuario);
+			map.setString("passwd", contraseña);
 			map.setString("title", title);
 			map.setString("comments", comentarios);
-			map.setLong("user_id", new Long(12));
 			map.setString("command", "nueva");
 		} catch (JMSException e) {
 			Log.warn(e);
@@ -57,8 +61,8 @@ public class AñadirTareaAction implements Action {
 		sender = session.createProducer(queue);
 		con.start();
 	}
-	
-	private void close() throws JMSException{
+
+	private void close() throws JMSException {
 		sender.close();
 		session.close();
 		con.close();
