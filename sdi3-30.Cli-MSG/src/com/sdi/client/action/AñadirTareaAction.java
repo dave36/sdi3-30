@@ -18,8 +18,8 @@ import alb.util.menu.Action;
 
 public class AñadirTareaAction implements Action {
 
-	private static final String JMS_CONNECTION_FACTORY = "jms/RemoteConnectionFactory";
-	private static final String NOTANEITOR_QUEUE = "jms/queue/envio";
+	private static final String JMS_CONNECTION_FACTORY = 
+			"jms/RemoteConnectionFactory";
 
 	private Session session = null;
 	private MessageProducer sender = null;
@@ -35,7 +35,8 @@ public class AñadirTareaAction implements Action {
 		MapMessage msg = createMessage(usuario, contraseña, title, comentarios);
 		sender.send(msg);
 		con.close();
-		Console.println("Tarea añadida");
+		initialize("jms/queue/recepcion");
+		con.close();
 	}
 
 	private MapMessage createMessage(String usuario, String contraseña,
@@ -44,7 +45,7 @@ public class AñadirTareaAction implements Action {
 		try {
 			map = session.createMapMessage();
 			map.setString("usuario", usuario);
-			map.setString("passwd", contraseña);
+			map.setString("contraseña", contraseña);
 			map.setString("title", title);
 			map.setString("comments", comentarios);
 			map.setString("command", "nueva");
@@ -67,11 +68,5 @@ public class AñadirTareaAction implements Action {
 			consumer.setMessageListener(new AuditMessageListener());
 		}
 		con.start();
-	}
-
-	private void close() throws JMSException {
-		sender.close();
-		session.close();
-		con.close();
 	}
 }
