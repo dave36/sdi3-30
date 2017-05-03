@@ -112,6 +112,15 @@ public class Task implements Serializable{
 				+ ", categoryId=" + categoryId 
 				+ ", userId=" + userId + "]";
 	}
+	
+	public String toStringMensaje(){
+		return "id=" + id 
+				+ ", title=" + title 
+				+ ", comments=" + comments 
+				+ ", created=" + created
+				+ ", planned=" + planned 
+				+ ", categoryId=" + categoryId ;
+	}
 
 	@Override
 	public int hashCode() {

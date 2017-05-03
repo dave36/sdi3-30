@@ -27,7 +27,12 @@ import com.sdi.infrastructure.Factories;
 import alb.util.console.Console;
 import alb.util.log.Log;
 
-@MessageDriven(activationConfig = { @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/queue/envio") })
+@MessageDriven(
+		activationConfig = { 
+				@ActivationConfigProperty(
+						propertyName = "destination",
+						propertyValue = "jms/queue/envio")
+})
 public class GTDListener implements MessageListener {
 
 	private TaskService taskService = Factories.services.getTaskService();
@@ -37,7 +42,7 @@ public class GTDListener implements MessageListener {
 	public void onMessage(Message msg) {
 		Console.println("GTDListener: Msg received");
 		try {
-			initialize();
+			initialize(NOTANEITOR_QUEUE_RESPUESTA);
 			process(msg);
 		} catch (JMSException e) {
 			Log.warn(e);
@@ -47,43 +52,67 @@ public class GTDListener implements MessageListener {
 	private void process(Message msg) throws JMSException {
 		MapMessage map = (MapMessage) msg;
 
+		User user = usuarioCorrecto(map.getString("usuario"),
+				map.getString("contraseña"));
+
+		if (user == null) {
+			// Mensaje
+			MapMessage msgresp = createResponseMessage("El usuario no existe");
+			sender.send(msgresp);
+			con.close();
+			// Error a cola log
+			initialize(NOTANEITOR_QUEUE_LOG);
+			msgresp = createResponseMessage("Intento de loggin con "
+					+ "usuario inexistente");
+			sender.send(msgresp);
+			con.close();
+			return;
+		}
+
 		String cmd = map.getString("command");
 		if ("ver".equals(cmd)) {
-			if (usuarioCorrecto(map.getString("usuario"),
-					map.getString("passwd"))) {
-				doFindTasks(new Long(12));
-			}
-			else{
-				Console.println("Error");
-			}
+			doFindTasks(user.getId());
 		} else if ("terminar".equals(cmd)) {
 			doFinishTarea(map);
 		} else if ("nueva".equals(cmd)) {
-			doNewTarea(map);
+			doNewTarea(map, user.getId());
+		} else {
+			// Error a la cola del log
+			initialize(NOTANEITOR_QUEUE_LOG);
+			MapMessage msgresp = createResponseMessage("Comando desconocido");
+			sender.send(msgresp);
+			con.close();
 		}
 	}
 
-	private boolean usuarioCorrecto(String user, String passwd) {
+	private User usuarioCorrecto(String user, String passwd)
+			throws JMSException {
 		try {
-			if(userService==null){
-				System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-			}
 			User userLog = userService.findLoggableUser(user, passwd);
-			return userLog!=null;
+			return userLog;
 		} catch (BusinessException e) {
+			initialize(NOTANEITOR_QUEUE_LOG);
+			MapMessage msgresp = createResponseMessage("Error al buscar al "
+					+ "usuario en la base");
+			sender.send(msgresp);
+			con.close();
 			Log.warn(e);
-			return false;
-		}		
+			return null;
+		}
 	}
 
-	private void doFindTasks(Long long1) throws JMSException {
+	private void doFindTasks(Long userId) throws JMSException {
 		try {
-			List<Task> tareas = taskService
-					.findTodayTasksByUserId(new Long(12));
+			List<Task> tareas = taskService.findTodayTasksByUserId(userId);
 			ObjectMessage msg = createMessage(tareas);
 			sender.send(msg);
 		} catch (BusinessException e) {
-			System.out.println(e.getMessage());
+			initialize(NOTANEITOR_QUEUE_LOG);
+			MapMessage msgresp = createResponseMessage("Error al buscar las"
+					+ " tareas del usuario");
+			sender.send(msgresp);
+			con.close();
+			Log.warn(e);
 		} finally {
 			con.close();
 		}
@@ -91,35 +120,69 @@ public class GTDListener implements MessageListener {
 
 	private void doFinishTarea(MapMessage map) throws JMSException {
 		try {
-			taskService.markTaskAsFinished(map.getLong("task_id"));
+			Task task = taskService.findTaskById(map.getLong("task_id"));
+			if (task != null) {
+				taskService.markTaskAsFinished(task.getId());
+				MapMessage msg = createResponseMessage("Tarea finalizada");
+				sender.send(msg);
+			} else {
+				// Informo del error al usuario
+				MapMessage msg = createResponseMessage("La tarea no existe");
+				sender.send(msg);
+				// Al log
+				initialize(NOTANEITOR_QUEUE_LOG);
+				MapMessage msgresp = createResponseMessage("Se intento eliminar"
+						+ " una tarea inexistente");
+				sender.send(msgresp);
+				con.close();
+			}
 		} catch (BusinessException e) {
+			initialize(NOTANEITOR_QUEUE_LOG);
+			MapMessage msgresp = createResponseMessage("Error al buscar la"
+					+ " tarea en la base de datos");
+			sender.send(msgresp);
+			con.close();
 			Log.warn(e);
+		} finally {
+			con.close();
 		}
 	}
 
-	private void doNewTarea(MapMessage map) throws JMSException {
+	private void doNewTarea(MapMessage map, Long userId) throws JMSException {
 		Task task = new Task();
 		task.setTitle(map.getString("title"));
 		task.setComments(map.getString("comments"));
-		task.setUserId(new Long(12));
+		task.setUserId(userId);
 		try {
 			taskService.createTask(task);
+			MapMessage msg = createResponseMessage("Tarea creada");
+			sender.send(msg);
 		} catch (BusinessException e) {
+			initialize(NOTANEITOR_QUEUE_LOG);
+			MapMessage msgresp = createResponseMessage("Error al crear tarea");
+			sender.send(msgresp);
+			con.close();
 			Log.warn(e);
+		} finally {
+			con.close();
 		}
 	}
 
-	private static final String JMS_CONNECTION_FACTORY = "java:/ConnectionFactory";
-	private static final String NOTANEITOR_QUEUE = "jms/queue/recepcion";
+	private static final String JMS_CONNECTION_FACTORY = 
+			"java:/ConnectionFactory";
+	private static final String NOTANEITOR_QUEUE_RESPUESTA = 
+			"jms/queue/recepcion";
+	private static final String NOTANEITOR_QUEUE_LOG = 
+			"jms/queue/log";
 
 	private Session session = null;
 	private MessageProducer sender = null;
 	private Connection con = null;
 
-	public void initialize() throws JMSException {
+	public void initialize(String cola) throws JMSException {
 		ConnectionFactory factory = (ConnectionFactory) Jndi
 				.find(JMS_CONNECTION_FACTORY);
-		Destination queue = (Destination) Jndi.find(NOTANEITOR_QUEUE);
+		Destination queue = (Destination) Jndi.find(cola);
 		con = factory.createConnection("sdi", "password");
 		session = con.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		sender = session.createProducer(queue);
@@ -131,10 +194,21 @@ public class GTDListener implements MessageListener {
 		try {
 			List<String> tareas = new ArrayList<>();
 			for (Task t : lista) {
-				tareas.add(t.toString());
+				tareas.add(t.toStringMensaje());
 			}
 			map = session.createObjectMessage();
 			map.setObject((Serializable) tareas);
+		} catch (JMSException e) {
+			Log.warn(e);
+		}
+		return map;
+	}
+
+	private MapMessage createResponseMessage(String mensaje) {
+		MapMessage map = null;
+		try {
+			map = session.createMapMessage();
+			map.setString("mensaje", mensaje);
 		} catch (JMSException e) {
 			Log.warn(e);
 		}

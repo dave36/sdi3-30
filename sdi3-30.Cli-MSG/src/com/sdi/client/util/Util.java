@@ -12,4 +12,8 @@ public class Util {
 			Console.println(t);
 		}
 	}
+	
+	public static void printMensaje(String mensaje){
+		Console.println(mensaje);
+	}
 }
