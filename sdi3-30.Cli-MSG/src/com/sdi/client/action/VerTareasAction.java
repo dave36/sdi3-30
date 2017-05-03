@@ -17,7 +17,8 @@ import alb.util.menu.Action;
 
 public class VerTareasAction implements Action {
 
-	private static final String JMS_CONNECTION_FACTORY = "jms/RemoteConnectionFactory";
+	private static final String JMS_CONNECTION_FACTORY = 
+			"jms/RemoteConnectionFactory";
 
 	private Session session = null;
 	private MessageProducer sender = null;

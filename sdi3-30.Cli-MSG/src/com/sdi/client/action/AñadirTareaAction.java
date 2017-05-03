@@ -5,9 +5,11 @@ import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
+import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 
+import com.sdi.client.util.AuditMessageListener;
 import com.sdi.client.util.Jndi;
 
 import alb.util.console.Console;
@@ -29,10 +31,10 @@ public class AñadirTareaAction implements Action {
 		String contraseña = Console.readString("Constraseña");
 		String title = Console.readString("Titulo");
 		String comentarios = Console.readString("Comentarios");
-		initialize();
+		initialize("jms/queue/envio");
 		MapMessage msg = createMessage(usuario, contraseña, title, comentarios);
 		sender.send(msg);
-		close();
+		con.close();
 		Console.println("Tarea añadida");
 	}
 
@@ -52,13 +54,18 @@ public class AñadirTareaAction implements Action {
 		return map;
 	}
 
-	public void initialize() throws JMSException {
+	public void initialize(String cola) throws JMSException {
 		ConnectionFactory factory = (ConnectionFactory) Jndi
 				.find(JMS_CONNECTION_FACTORY);
-		Destination queue = (Destination) Jndi.find(NOTANEITOR_QUEUE);
+		Destination queue = (Destination) Jndi.find(cola);
 		con = factory.createConnection("sdi", "password");
 		session = con.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		sender = session.createProducer(queue);
+		if (cola.equals("jms/queue/envio")) {
+			sender = session.createProducer(queue);
+		} else {
+			MessageConsumer consumer = session.createConsumer(queue);
+			consumer.setMessageListener(new AuditMessageListener());
+		}
 		con.start();
 	}
 
