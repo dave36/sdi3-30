@@ -20,6 +20,12 @@ public class VerTareasAction implements Action {
 
 	private static final String JMS_CONNECTION_FACTORY = 
 			"jms/RemoteConnectionFactory";
+	
+	private static final String JMS_QUEUE_ENVIO = 
+			"jms/queue/envio";
+	
+	private static final String JMS_QUEUE_RECEPCION = 
+			"jms/queue/recepcion";
 
 	private Session session = null;
 	private MessageProducer sender = null;
@@ -29,11 +35,11 @@ public class VerTareasAction implements Action {
 	public void execute() throws Exception {
 		String usuario = Console.readString("Usuario");
 		String contraseña = Console.readString("Contraseña");
-		initialize("jms/queue/envio");
+		initialize(JMS_QUEUE_ENVIO);
 		MapMessage map = createMessage(usuario, contraseña);
 		sender.send(map);
 		con.close();
-		initialize("jms/queue/recepcion");
+		initialize(JMS_QUEUE_RECEPCION);
 		con.close();
 	}
 
@@ -56,7 +62,7 @@ public class VerTareasAction implements Action {
 		Destination queue = (Destination) Jndi.find(cola);
 		con = factory.createConnection("sdi", "password");
 		session = con.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		if (cola.equals("jms/queue/envio")) {
+		if (cola.equals(JMS_QUEUE_ENVIO)) {
 			sender = session.createProducer(queue);
 		} else {
 			MessageConsumer consumer = session.createConsumer(queue);

@@ -20,6 +20,12 @@ public class AñadirTareaAction implements Action {
 
 	private static final String JMS_CONNECTION_FACTORY = 
 			"jms/RemoteConnectionFactory";
+	
+	private static final String JMS_QUEUE_ENVIO = 
+			"jms/queue/envio";
+	
+	private static final String JMS_QUEUE_RECEPCION = 
+			"jms/queue/recepcion";
 
 	private Session session = null;
 	private MessageProducer sender = null;
@@ -31,11 +37,11 @@ public class AñadirTareaAction implements Action {
 		String contraseña = Console.readString("Constraseña");
 		String title = Console.readString("Titulo");
 		String comentarios = Console.readString("Comentarios");
-		initialize("jms/queue/envio");
+		initialize(JMS_QUEUE_ENVIO);
 		MapMessage msg = createMessage(usuario, contraseña, title, comentarios);
 		sender.send(msg);
 		con.close();
-		initialize("jms/queue/recepcion");
+		initialize(JMS_QUEUE_RECEPCION);
 		con.close();
 	}
 
@@ -61,7 +67,7 @@ public class AñadirTareaAction implements Action {
 		Destination queue = (Destination) Jndi.find(cola);
 		con = factory.createConnection("sdi", "password");
 		session = con.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		if (cola.equals("jms/queue/envio")) {
+		if (cola.equals(JMS_QUEUE_ENVIO)) {
 			sender = session.createProducer(queue);
 		} else {
 			MessageConsumer consumer = session.createConsumer(queue);

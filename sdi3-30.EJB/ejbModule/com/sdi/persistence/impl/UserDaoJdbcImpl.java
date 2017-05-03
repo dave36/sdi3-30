@@ -43,10 +43,6 @@ public class UserDaoJdbcImpl implements UserDao {
 					rs.getInt("completadas_retrasadas"), rs.getInt("planificadas"),
 					rs.getInt("sin_planificar"));
 			ut.setUser(u);
-			ut.setTareasCompletadas(rs.getInt("completadas"));
-			ut.setTareasCompletadasRet(rs.getInt("completadas_retrasadas"));
-			ut.setTareasPlanificadas(rs.getInt("planificadas"));
-			ut.setTareasNoPlanificadas(rs.getInt("sin_planificar"));
 			return ut;
 		}
 		

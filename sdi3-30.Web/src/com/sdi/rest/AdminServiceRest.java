@@ -18,16 +18,16 @@ import com.sdi.dto.User;
 public interface AdminServiceRest {
 	
 	@DELETE
-	@Path("{id}")
+	@Path("/deleteUser{id}")
 	public void deepDeleteUser(@PathParam("{id}") Long id) throws EntityNotFoundException;
 	
 	@PUT
-	@Path("{id}")
+	@Path("/disableUser{id}")
 	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	public void disableUser(@PathParam("{id}") Long id) throws EntityNotFoundException;
 	
 	@PUT
-	@Path("{id}")
+	@Path("/enableUser{id}")
 	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	public void enableUser(@PathParam("{id}") Long id) throws EntityNotFoundException;
 	
@@ -36,7 +36,7 @@ public interface AdminServiceRest {
 	public List<User> findAllUsers();
 	
 	@GET
-	@Path("{id}")
+	@Path("/findUser{id}")
 	@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	public User findUserById(@PathParam("{id}") Long id) throws EntityNotFoundException;
 	
