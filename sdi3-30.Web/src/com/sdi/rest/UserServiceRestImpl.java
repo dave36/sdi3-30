@@ -14,8 +14,7 @@ public class UserServiceRestImpl implements UserServiceRest {
 	UserService service = Factories.services.getUserService();
 	
 	@Override
-	public User findLoggableUser(String login, String password)
-			throws EntityNotFoundException {
+	public User findLoggableUser(String login, String password) {
 		try {
 			return service.findLoggableUser(login, password);
 		} catch (BusinessException e) {
